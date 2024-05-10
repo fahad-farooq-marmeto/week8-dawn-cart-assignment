@@ -30,11 +30,6 @@
     <div class="title-wrapper-with-link">
       <h1 class="title title--primary">{{ 'sections.cart.title' | t }}</h1>
 
-      <!-- Adding the "Remove Bundles" button -->
-
-      {% comment %}
-        Loop through cart items to find bundle items and store their IDs in a JavaScript array
-      {% endcomment %}
       {% assign bundleProductIds = '[]' %}
       {% for item in cart.items %}
         {% if item.properties and item.properties._bundle == 'true' %}
@@ -49,7 +44,19 @@
 
       {% comment %} fahad ka button {% endcomment %}
 
-      <button id="remove-bundle-items" onclick="removeBundleItems()">Remove All Bundles</button>
+      <button
+        id="remove-bundle-items"
+        style="
+          padding: 1.5rem;
+          border-radius: 30px;
+          background: #000;
+          color: #fff;
+          font-weight: 600;
+        "
+        onclick="removeBundleItems()"
+      >
+        Remove All Bundles
+      </button>
     </div>
 
     <div class="cart__warnings">
