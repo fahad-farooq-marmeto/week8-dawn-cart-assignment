@@ -29,9 +29,27 @@
   <div class="page-width">
     <div class="title-wrapper-with-link">
       <h1 class="title title--primary">{{ 'sections.cart.title' | t }}</h1>
-      <a href="{{ routes.all_products_collection_url }}" class="underlined-link">
-        {{- 'general.continue_shopping' | t -}}
-      </a>
+
+      <!-- Adding the "Remove Bundles" button -->
+
+      {% comment %}
+        Loop through cart items to find bundle items and store their IDs in a JavaScript array
+      {% endcomment %}
+      {% assign bundleProductIds = '[]' %}
+      {% for item in cart.items %}
+        {% if item.properties and item.properties._bundle == 'true' %}
+          {% assign bundleProductIds = bundleProductIds
+            | append: ','
+            | append: '"'
+            | append: item.product.id
+            | append: '"'
+          %}
+        {% endif %}
+      {% endfor %}
+
+      {% comment %} fahad ka button {% endcomment %}
+
+      <button id="remove-bundle-items" onclick="removeBundleItems()">Remove All Bundles</button>
     </div>
 
     <div class="cart__warnings">
@@ -102,7 +120,14 @@
                         <p class="caption-with-letter-spacing">{{ item.product.vendor }}</p>
                       {%- endif -%}
 
-                      <a href="{{ item.url }}" class="cart-item__name h4 break">{{ item.product.title | escape }}</a>
+                      {% for item in cart.items %}
+                        {% if item.properties and item.properties._bundle == 'true' %}
+                          <p>
+                            Item '{{ item.title }}' is a bundle item.
+                            <span class="bundle-item" data-line="{{ forloop.index }}">Ok</span>
+                          </p>
+                        {% endif %}
+                      {% endfor %}
 
                       {%- if item.original_price != item.final_price -%}
                         <div class="cart-item__discounted-prices">
@@ -487,3 +512,43 @@
   ]
 }
 {% endschema %}
+
+<script>
+  // Function to remove all bundle items
+  function removeBundleItems() {
+    // Collect all the bundle items
+    const bundleItemElements = document.querySelectorAll('.bundle-item');
+    const formData = new FormData();
+
+    // Loop through each bundle item element to get the data-line attribute
+    bundleItemElements.forEach((bundleItem) => {
+      const lineIndex = bundleItem.getAttribute('data-line');
+      if (lineIndex) {
+        formData.append('updates[]', 0); // Setting the quantity to 0 to remove the item
+      }
+    });
+
+    if (formData.has('updates[]') === false) {
+      alert('No bundle items to remove!');
+      return;
+    }
+
+    fetch('{{ routes.cart_url }}', {
+      method: 'POST',
+      body: formData,
+    })
+      .then((response) => {
+        if (response.ok) {
+          window.location.reload();
+        } else {
+          throw new Error('Network response was not ok.');
+        }
+      })
+      .catch((error) => {
+        console.error('Error removing bundle items:', error);
+        alert('An error occurred while trying to remove bundle items.');
+      });
+  }
+
+  document.getElementById('remove-bundle-items').addEventListener('click', removeBundleItems);
+</script>

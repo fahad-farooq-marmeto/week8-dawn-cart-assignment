@@ -226,6 +226,38 @@
                   class="product-form__input product-form__quantity{% if settings.inputs_shadow_vertical_offset != 0 and settings.inputs_shadow_vertical_offset < 0 %} product-form__quantity-top{% endif %}"
                   {{ block.shopify_attributes }}
                 >
+                  <div>hello fahad</div>
+
+                  <div class="product-bundle">
+                    <h2 class="product-bundle__heading">Frequently Bought Together</h2>
+                    <div class="product-bundle__grid">
+                      {% for product in product.metafields.custom.bundle.value %}
+                        <div class="product-bundle__grid-item">
+                          <div class="product-bundle__checkbox-wrapper">
+                            <input
+                              id="bundle-checkbox-{{ forloop.index }}"
+                              class="product-bundle__checkbox"
+                              data-product-id="{{ product.selected_or_first_available_variant.id }}"
+                              value="{{ product.selected_or_first_available_variant.id }}"
+                              type="checkbox"
+                            >
+                            <img
+                              class="product-bundle__image"
+                              src="{{ product.featured_image | img_url: 'medium' }}"
+                              alt="{{ product.title }}"
+                              height=""
+                              width=""
+                            >
+                          </div>
+                          <div class="product-bundle__title">{{ product.title }}</div>
+                          <div class="product-bundle__price">{{ product.price | money }}</div>
+                        </div>
+                      {% endfor %}
+                    </div>
+                  </div>
+
+                  <div>Bye fahad</div>
+
                   {% comment %} TODO: enable theme-check once `item_count_for_variant` is accepted as valid filter {% endcomment %}
                   {% # theme-check-disable %}
                   {%- assign cart_qty = cart
@@ -2307,3 +2339,42 @@
   ]
 }
 {% endschema %}
+
+<style>
+  .product-bundle__grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    align-items: flex-start;
+    justify-content: flex-start;
+  }
+
+  .product-bundle__grid-item {
+    position: relative;
+    flex: 0 1 150px; /* Adjust based on how many items should fit per row */
+  }
+
+  .product-bundle__checkbox-wrapper {
+    position: relative;
+  }
+
+  .product-bundle__checkbox {
+    position: absolute;
+    top: 8px; /* Adjust positioning of checkbox to align with the top-left of the image */
+    left: 8px;
+    z-index: 1;
+    background-color: rgba(255, 255, 255, 0.7);
+  }
+
+  .product-bundle__image {
+    width: 176px;
+    height: 171px;
+    object-fit: cover; /* Adjusts image size within the given dimensions */
+  }
+
+  .product-bundle__title,
+  .product-bundle__price {
+    text-align: center;
+    margin-top: 8px;
+  }
+</style>
